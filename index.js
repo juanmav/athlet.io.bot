@@ -12,17 +12,14 @@ bot.help((ctx) => ctx.reply('Work in progress'));
 bot.command('/stock', (ctx) => {
     console.info('Pedido de stock entrante!');
     console.log("filter: " + ctx.message.text.split('/stock')[1].trim());
-    let filter =ctx.message.text.split('/stock')[1].trim().toLocaleLowerCase();
+    let filter = ctx.message.text.split('/stock')[1].trim().toLocaleLowerCase();
 
     fetch(endPoint)
         .then(response => response.json())
         .then( data => {
             let items = filter ? data.items.filter( i => i.name.toLowerCase().includes(filter)) : data.items;
             let labels = items.map( i => {
-                let subLabels = i.productOptions.Sabor ?
-                    i.productOptions.Sabor.choices.map( c => '-- '+ c.description).join('\n')
-                    :
-                    i.productOptions.Tipo.choices.map( c => '-- ' + c.description).join('\n');
+                let subLabels = i.productOptions.Sabor.choices.map( c => '-- '+ c.description).join('\n');
                 return '- ' + i.name + '\n' + subLabels;
             }).join('\n');
             return ctx.reply('Resultado: \n' + labels);
