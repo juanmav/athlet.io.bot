@@ -3,6 +3,7 @@ dotenv.config();
 const Telegraf = require('telegraf');
 const fetch = require('node-fetch');
 const endPoint = process.env.ENDPOINT;
+const filterProducts = require('./filterProducts');
 
 console.log('Corriendo bot :)');
 
@@ -12,19 +13,17 @@ bot.help((ctx) => ctx.reply('Work in progress'));
 bot.command('/stock', (ctx) => {
     console.info('Pedido de stock entrante!');
     console.log("filter: " + ctx.message.text.split('/stock')[1].trim());
-    let filter = ctx.message.text.split('/stock')[1].trim().toLocaleLowerCase();
+    let stringFilter = ctx.message.text.split('/stock')[1].trim().toLocaleLowerCase();
 
     fetch(endPoint)
         .then(response => response.json())
         .then( data => {
-            let items = filter ? data.items.filter( i => i.name.toLowerCase().includes(filter)) : data.items;
-            let labels = items.map( i => {
-                let subLabels = i.productOptions.Sabor.choices.map( c => '-- '+ c.description).join('\n');
-                return '- ' + i.name + '\n' + subLabels;
-            }).join('\n');
+            const labels = filterProducts(data, stringFilter);
             return ctx.reply('Resultado: \n' + labels);
         })
 });
+
+
 
 bot.on('message', (ctx) => {
     console.info('Pedido entrante!');
